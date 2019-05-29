@@ -112,7 +112,6 @@ RUN a2enmod rewrite remoteip ;\
     a2enconf remoteip
 
 ENV NEXTCLOUD_VERSION 15.0.8
-
 RUN set -ex; \
     fetchDeps=" \
         gnupg \
@@ -127,6 +126,7 @@ RUN set -ex; \
         "https://download.nextcloud.com/server/releases/nextcloud-${NEXTCLOUD_VERSION}.tar.bz2.asc"; \
     export GNUPGHOME="$(mktemp -d)"; \
 # gpg key from https://nextcloud.com/nextcloud.asc
+    mkdir ~/.gnupg && echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf; \
     gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys 28806A878AE423A28372792ED75899B9A724937A; \
     gpg --batch --verify nextcloud.tar.bz2.asc nextcloud.tar.bz2; \
     tar -xjf nextcloud.tar.bz2 -C /usr/src/; \
@@ -138,6 +138,7 @@ RUN set -ex; \
     chmod +x /usr/src/nextcloud/occ; \
     \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps; \
+    rm -rf ~/.gnupg; \
     rm -rf /var/lib/apt/lists/*
 
 COPY *.sh upgrade.exclude /
